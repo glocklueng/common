@@ -3,19 +3,28 @@
 #include "stdint.h"
 
 #include "pins_common.h"
+#include "can_rt.h"
+#include "assert.h"
+#include "uart.h"
 
 static int32_t can_rt_addfilterids(const uint16_t *filters, const uint16_t filter_num);
 
 int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
 {
     // Assert paramaters
-    assert_param(filters);
-    assert_param(filter_num < CAN_RT_NUM_FILTERS_MAX);
-
-    if(!filters || !(filter_num < CAN_RT_NUM_FILTERS_MAX))
+    if(c_assert(filters) || c_assert(filter_num < CAN_RT_NUM_FILTERS_MAX))
     {
         return 1;
     }
+
+    // CAN GPIO Configuration: PB8=CAN_RX, PB9=CAN_TX
+    GPIO_InitTypeDef GPIO_InitStruct;
+    GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF4_CAN;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     // Enable bxCAN peripheral clock
     __CAN_CLK_ENABLE();
@@ -25,11 +34,13 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
     CAN->BTR = (uint32_t)0;
 
     // Enter bxCAN initialization mode
-    CAN->MCR &= ~CAN_MCR_SLEEP;
     CAN->MCR |= CAN_MCR_INRQ;
 
     // Wait for hardware to enter initialization mode
     while((CAN->MSR & CAN_MSR_INAK) != CAN_MSR_INAK);
+
+    // Exit sleep mode
+    CAN->MCR &= ~CAN_MCR_SLEEP;
 
     // Time Triggered operation disabled
     CAN->MCR &= ~CAN_MCR_TTCM;
@@ -65,60 +76,42 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
     CAN->BTR |= CAN_BTR_LBKM;
 
     // Switch hardware to normal mode and wait for acknowledge
-    CAN->MCR &= CAN_MCR_INRQ;
+    CAN->MCR &=~ CAN_MCR_INRQ;
+
     while ((CAN->MSR & CAN_MSR_INAK) == CAN_MSR_INAK);
 
-    // CAN GPIO Configuration: PB8=CAN_RX, PB9=CAN_TX
-    GPIO_InitTypeDef GPIO_InitStruct;
-    GPIO_InitStruct.Pin = CAN_N_PIN | CAN_P_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF4_CAN;
-    HAL_GPIO_Init(CAN_PORT, &GPIO_InitStruct);
-
     // Add test filter and send packet through mailmox 0
-    const uint16_t test_filters[] = {0x1234};
-    const uint8_t test_packet[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF};
-    if(can_rt_addfilterids(test_filters, sizeof(test_filters)))
+    const uint16_t test_filters[] = {0x575};
+    const uint8_t test_packet[] = {0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xB0, 0xB1};
+    if(can_rt_addfilterids(test_filters, 1))
     {
         return 1;
     }
+
+    while((CAN->TSR & CAN_TSR_TME0) != CAN_TSR_TME0);
     
     // Set size of transmission
-    CAN->sTxMailBox[0].TDTR = (uint32_t)(sizeof(test_packet));
+    CAN->sTxMailBox[0].TDTR = (uint32_t)(8);
 
     // Put data into mailbox 0
-    CAN->sTxMailBox[0].TDLR = test_packet[0] | (test_packet[1] << 8) | (test_packet[2] << 16) | (test_packet[3] << 24);
-    CAN->sTxMailBox[0].TDHR = test_packet[4] | (test_packet[5] << 8) | (test_packet[6] << 16) | (test_packet[7] << 24);
+    CAN->sTxMailBox[0].TDLR = (uint32_t)test_packet[0] | (test_packet[1] << 8) | (test_packet[2] << 16) | (test_packet[3] << 24);
+    CAN->sTxMailBox[0].TDHR = (uint32_t)test_packet[4] | (test_packet[5] << 8) | (test_packet[6] << 16) | (test_packet[7] << 24);
 
-    // Reset TX mailbox identitier register
-    CAN->sTxMailBox[0].TIR = (uint32_t)0;
-
-    // Standard ID
-    CAN->sTxMailBox[0].TIR &= ~CAN_TI0R_IDE;
-
-    // Remote Transmission Request is Data
-    CAN->sTxMailBox[0].TIR &= ~CAN_TI0R_RTR;
-
-    // Set the identifier, it's the upper 11 bits, so have to shift left by 21
-    CAN->sTxMailBox[0].TIR |= (uint32_t)(CAN_TI0R_STID | (test_filters[0] << 21));
-
-    // Transmit request
-    CAN->sTxMailBox[0].TIR |= CAN_TI0R_TXRQ;
+    // Set the identifier, it's the upper 11 bits, so have to shift left by 21, and request transmission
+    CAN->sTxMailBox[0].TIR = (uint32_t)(test_filters[0] << 21 | CAN_TI0R_TXRQ);
 
     // Wait for FIFO0 to have the received packet
-    while(!(CAN->RF0R | CAN_RF0R_FMP0));
+    while((CAN->RF0R & CAN_RF0R_FMP0) == 0);
 
     // Compare received identitier to what we sent
-    if((CAN->sFIFOMailBox[0].RIR | CAN_RI0R_STID) >> 21 != test_filters[0])
+    if(((CAN->sFIFOMailBox[0].RIR & CAN_RI0R_STID) >> 21) != test_filters[0])
     {
         return 1;
     }
 
     // Compare received bytes to what we set
-    if( CAN->sFIFOMailBox[0].RDLR != (test_packet[0] | (test_packet[1] << 8) | (test_packet[2] << 16) | (test_packet[3] << 24)) ||
-        CAN->sFIFOMailBox[0].RDHR != (test_packet[4] | (test_packet[5] << 8) | (test_packet[6] << 16) | (test_packet[7] << 24)))
+    if( CAN->sFIFOMailBox[0].RDLR != ((uint32_t)test_packet[0] | (test_packet[1] << 8) | (test_packet[2] << 16) | (test_packet[3] << 24)) ||
+        CAN->sFIFOMailBox[0].RDHR != ((uint32_t)test_packet[4] | (test_packet[5] << 8) | (test_packet[6] << 16) | (test_packet[7] << 24)))
     {
         return 1;
     }
@@ -185,11 +178,11 @@ static int32_t can_rt_addfilterids(const uint16_t *filters, const uint16_t filte
         // Bits 15:0 are ID
         if(x == 1)
         {
-            CAN->sFilterRegister[i].FR1 = (uint32_t)(0xFFFF0000 | (uint32_t)filters[fi]);
+            CAN->sFilterRegister[i].FR1 = (uint32_t)(0xFFFF0000 | ((uint32_t)filters[fi] << 5));
         }
         else if(x == 2)
         {
-            CAN->sFilterRegister[i].FR2 = (uint32_t)(0xFFFF0000 | (uint32_t)filters[fi]);
+            CAN->sFilterRegister[i].FR2 = (uint32_t)(0xFFFF0000 | ((uint32_t)filters[fi] << 5));
         }
         else
         {
