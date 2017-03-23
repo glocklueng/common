@@ -129,7 +129,7 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
     while((CAN->MSR & CAN_MSR_INAK) != CAN_MSR_INAK);
 
     // Disable the loopback mode so we can actulally receive external messages
-    //CAN->BTR &= ~CAN_BTR_LBKM;
+    CAN->BTR &= ~CAN_BTR_LBKM;
 
     // Go to bxCAN normal mode and wait for acknowledge, takes 30us, TODO: add 1000us timeout since this depends on bus being idle
     CAN->MCR &= ~CAN_MCR_INRQ;
