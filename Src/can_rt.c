@@ -5,7 +5,6 @@
 #include "pins_common.h"
 #include "can_rt.h"
 #include "assert.h"
-#include "uart.h"
 
 static int32_t can_rt_addfilterids(const uint16_t *filters, const uint16_t filter_num);
 
@@ -36,7 +35,7 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
     // Enter bxCAN initialization mode
     CAN->MCR |= CAN_MCR_INRQ;
 
-    // Wait for hardware to enter initialization mode
+    // Wait for hardware to enter initialization mode. Takes 400ns, TODO: add 10us timeout
     while((CAN->MSR & CAN_MSR_INAK) != CAN_MSR_INAK);
 
     // Exit sleep mode
@@ -51,8 +50,8 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
     // Auto Wake Up enabled
     CAN->MCR |= CAN_MCR_AWUM;
 
-    // No automatic retransmission disabled (i.e. retransmission enabled, cuz double negative)
-    CAN->MCR &= ~CAN_MCR_NART;
+    // No automatic retransmission enabled
+    CAN->MCR |= CAN_MCR_NART;
 
     // Receive Fifo Locked Mode disabled, we will lose older mesages in case of overrun
     CAN->MCR &= ~CAN_MCR_RFLM;
@@ -78,6 +77,7 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
     // Switch hardware to normal mode and wait for acknowledge
     CAN->MCR &=~ CAN_MCR_INRQ;
 
+    // Wait for acknowledge, takes 30uS at given baud rate, TODO: add 1000us timeout since this depends on bus being idle
     while ((CAN->MSR & CAN_MSR_INAK) == CAN_MSR_INAK);
 
     // Add test filter and send packet through mailmox 0
@@ -88,6 +88,7 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
         return 1;
     }
 
+    // Wait for transmission mailbox to be empty, takes 400ns, TODO: add 10us timeout
     while((CAN->TSR & CAN_TSR_TME0) != CAN_TSR_TME0);
     
     // Set size of transmission
@@ -100,7 +101,7 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
     // Set the identifier, it's the upper 11 bits, so have to shift left by 21, and request transmission
     CAN->sTxMailBox[0].TIR = (uint32_t)(test_filters[0] << 21 | CAN_TI0R_TXRQ);
 
-    // Wait for FIFO0 to have the received packet
+    // Wait for FIFO0 to have the received packet, takes 260uS, TODO: add 1000us timeout
     while((CAN->RF0R & CAN_RF0R_FMP0) == 0);
 
     // Compare received identitier to what we sent
@@ -119,18 +120,19 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
     // Release the fifo message
     CAN->RF0R |= CAN_RF0R_RFOM0;
 
-    // Wait for release
-    while(CAN->RF0R | CAN_RF0R_RFOM0);
+    // Wait for release, takes 400ns, TODO: add 10uS timeout
+    while(CAN->RF0R & CAN_RF0R_RFOM0);
 
     // Go to bxCAN init mode again and wait for acknowledge
     CAN->MCR |= CAN_MCR_INRQ;
+
     while((CAN->MSR & CAN_MSR_INAK) != CAN_MSR_INAK);
 
     // Disable the loopback mode so we can actulally receive external messages
-    CAN->BTR |= CAN_BTR_LBKM;
+    //CAN->BTR &= ~CAN_BTR_LBKM;
 
-    // Go to bxCAN normal mode and wait for acknowledge
-    CAN->MCR &= CAN_MCR_INRQ;
+    // Go to bxCAN normal mode and wait for acknowledge, takes 30us, TODO: add 1000us timeout since this depends on bus being idle
+    CAN->MCR &= ~CAN_MCR_INRQ;
     while ((CAN->MSR & CAN_MSR_INAK) == CAN_MSR_INAK);
 
     // Add the filters
@@ -178,7 +180,10 @@ static int32_t can_rt_addfilterids(const uint16_t *filters, const uint16_t filte
         // Bits 15:0 are ID
         if(x == 1)
         {
+            // Set both filter registers to requested ID since when we activate the bank they BOTH become active
+            // If we only set FR1, whatever garbage is left in FR2 will be interpreted as an active filter ID
             CAN->sFilterRegister[i].FR1 = (uint32_t)(0xFFFF0000 | ((uint32_t)filters[fi] << 5));
+            CAN->sFilterRegister[i].FR2 = (uint32_t)(0xFFFF0000 | ((uint32_t)filters[fi] << 5));
         }
         else if(x == 2)
         {
@@ -202,10 +207,65 @@ static int32_t can_rt_addfilterids(const uint16_t *filters, const uint16_t filte
 
 int32_t can_rt_tx(const uint16_t id, const uint8_t *data, const uint8_t length)
 {
+    // Validate parameters
+    if( c_assert(data) ||
+        c_assert(length < CAN_RT_MAX_BYTES_PER_MESSAGE) ||
+        c_assert(id < (2 << 11)))
+    {
+        return 1;
+    }
+
+    // Check if transmission mailbox empty
+    if((CAN->TSR & CAN_TSR_TME0) != CAN_TSR_TME0)
+    {
+        return 1;
+    }
+    
+    // Set size of transmission
+    CAN->sTxMailBox[0].TDTR = (uint32_t)(length);
+
+    // Put data into mailbox 0
+    CAN->sTxMailBox[0].TDLR = (uint32_t)data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+    CAN->sTxMailBox[0].TDHR = (uint32_t)data[4] | (data[5] << 8) | (data[6] << 16) | (data[7] << 24);
+
+    // Set the identifier, it's the upper 11 bits, so have to shift left by 21, and request transmission
+    CAN->sTxMailBox[0].TIR = ((uint32_t)id << 21 | CAN_TI0R_TXRQ);
+    
     return 0;
 }
 
-int32_t can_rt_rx(uint8_t *data[CAN_RT_MAX_BYTES_PER_MESSAGE], uint8_t *num_messages)
+int32_t can_rt_rx(uint16_t *id, uint8_t *data, uint8_t *length)
 {
-   return 0; 
+    // Validate parameters
+    if( c_assert(id) ||
+        c_assert(data) ||
+        c_assert(length))
+    {
+        return 1;
+    }
+
+    // Check if there's anything in the receive FIFO0
+    if((CAN->RF0R & CAN_RF0R_FMP0) == 0)
+    {
+        return 1;
+    }
+
+    // Get all the bytes from the mailbox registers
+    data[0] = (uint8_t)((CAN->sFIFOMailBox[0].RDLR & 0x000000FF) >> 0);
+    data[1] = (uint8_t)((CAN->sFIFOMailBox[0].RDLR & 0x0000FF00) >> 8);
+    data[2] = (uint8_t)((CAN->sFIFOMailBox[0].RDLR & 0x00FF0000) >> 16);
+    data[3] = (uint8_t)((CAN->sFIFOMailBox[0].RDLR & 0xFF000000) >> 24);
+    data[4] = (uint8_t)((CAN->sFIFOMailBox[0].RDHR & 0x000000FF) >> 0);
+    data[5] = (uint8_t)((CAN->sFIFOMailBox[0].RDHR & 0x0000FF00) >> 8);
+    data[6] = (uint8_t)((CAN->sFIFOMailBox[0].RDHR & 0x00FF0000) >> 16);
+    data[7] = (uint8_t)((CAN->sFIFOMailBox[0].RDHR & 0xFF000000) >> 24);
+
+    // Get received ID and length
+    *id = (uint16_t)((CAN->sFIFOMailBox[0].RIR & CAN_RI0R_STID) >> 21);
+    *length = (uint16_t)((CAN->sFIFOMailBox[0].RDTR & CAN_RDT0R_DLC)); 
+
+    // Release FIFO
+    CAN->RF0R |= CAN_RF0R_RFOM0;
+
+    return 0; 
 }
