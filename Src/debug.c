@@ -9,7 +9,7 @@
 
 UART_HandleTypeDef huart3;
 
-#define UART_BAUD_RATE (230400)
+#define UART_BAUD_RATE (460800)
 #define DATA_SEND_TIMEOUT (100)
 
 void debug_init() {
