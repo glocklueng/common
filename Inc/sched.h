@@ -1,7 +1,7 @@
 #ifndef SCHED_H
 #define SCHED_H
 
-#define SCH_MAX_TASKS (10)
+#define SCH_MAX_TASKS (20)
 
 /* Limitations: */
 /* The ONLY INTERRUPT in the whole system shall be the systick (scheduling) interrupt */

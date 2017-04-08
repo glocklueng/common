@@ -1,107 +1,64 @@
-/*
- * can_comm.h
- *
- *  Created on: Apr 19, 2015
- *      Author: KabooHahahein
- */
-
+// (C) Waterloo Formula Electric 2017
 #ifndef CAN_COMM_H_
 #define CAN_COMM_H_
 
+// For static asserts
+#include "assert.h"
+
 #define CAN_MAX_BYTE_LEN        8
 
-typedef struct
-{
-	union
-	{
-		uint8_t byte;
-		struct
-		{
-			uint8_t ShiftUp:1;
-			uint8_t ShiftDown:1;
-			uint8_t ShiftClutch:1;
-			uint8_t ShiftClutchRelease:1;
-			uint8_t ElectricStart:1;
-			uint8_t HiVStart:1; // energize
-			uint8_t ICStart:1;
-			uint8_t ICStartRelease:1;
-		};
-	} status;
-} DCUCanData;
+// Addresses of boards, OR them together (e.g, when BMS sends to VCU, ID would be CAN_ID_BMS | CAN_ID_VCU == 0x3)
+// BMS and VCU are highest priority
+#define CAN_ID_BMS         (1 << 0)
+#define CAN_ID_VCU         (1 << 1)
+#define CAN_ID_DCU         (1 << 2)
+#define CAN_ID_PDB         (1 << 3)
+#define CAN_ID_DAU         (1 << 4)
 
+// BMS to VCU packet
 typedef struct __packed
 {
-	union
-	{
-		uint8_t byte;
-		struct
-		{
-			uint8_t MotorControllerOn:1;
-			uint8_t MotorControllerOff:1;
-			uint8_t IsRPM:1;
-			uint8_t _bit3:1;
-			uint8_t _bit4:1;
-			uint8_t _bit5:1;
-			uint8_t _bit6:1;
-			uint8_t _bit7:1;
-		};
-	} status;
-	float rpm;
-} VCUCanData;
+    uint8_t energizeStatus:1;   // Energized (1) or not energized (0)
+    uint8_t bpsPressed:1;       // Brake pressed (1), or not pressed (0)
+    uint8_t bpsFailed:1;        // BPS failed (1), or not failed (0)
+    uint8_t reserved[7];
+}
+BMS_VCU_CanData;
+STATIC_ASSERT(sizeof(BMS_VCU_CanData) == CAN_MAX_BYTE_LEN, BMS_VCU_CanData_sizecheck); // Make sure it's actually 8 bytes
 
-/**
- *
- * BMS Packet Defines
- *
- */
-
-typedef enum
+// BMS to DCU packet
+typedef struct __packed
 {
-	PBMS_DATA_NONE = 0,
-	PBMS_DATA_MEAN_VOLTAGE = 1,
-	PBMS_DATA_MAX_VOLTAGE = 2,
-	PBMS_DATA_MIN_VOLTAGE = 3,
-	PBMS_DATA_MEAN_TEMP = 4,
-	PBMS_DATA_MAX_TEMP = 5,
-	PBMS_DATA_MIN_TEMP = 6,
-	PBMS_BATT_BITMASK = 7
-} BMSDataType;
+    uint8_t amsFault:1;         // AMS fault (1), or no fault (0)
+    uint8_t reserved[7];
+}
+BMS_DCU_CanData;
+STATIC_ASSERT(sizeof(BMS_DCU_CanData) == CAN_MAX_BYTE_LEN, BMS_DCU_CanData_sizecheck);
 
-typedef enum
+// DCU to BMS packet
+typedef struct __packed
 {
-	PBMS_ERR_NONE = 0,
-	PBMS_ERR_VoV = 1,
-	PBMS_WARN_VuV = 2,
-	PBMS_ERR_VuV = 3,
-	PBMS_WARN_OTEMP = 4,
-	PBMS_ERR_OTEMP = 5,
-	PBMS_ERR_UTEMP = 6,
-	PBMS_AMS_READ_ERROR = 7,
-	PBMS_ERR_CELL_DELTA = 8
-} BMSError;
+    uint8_t hvEnable:1;         // HV enabled (1), or not enabled (0)
+    uint8_t reserved[7];
+}
+DCU_BMS_CanData;
+STATIC_ASSERT(sizeof(DCU_BMS_CanData) == CAN_MAX_BYTE_LEN, DCU_BMS_CanData_sizecheck);
 
-typedef union
+// DCU to VCU packet
+typedef struct __packed
 {
-	uint8_t _bytes[6];
-	struct __packed
-	{
-		union
-		{
-			uint16_t _short;
-			struct
-			{
-				uint8_t Fault:1;
-				uint8_t HiVEnabled:1;
-				BMSError ErrorType:4;
-				BMSDataType ExtraData:3;
-			};
-		} header;
-		union
-		{
-			uint32_t errorMask; // a mask of the batteries that are vov or vuv or over temp.
-			float value;
-		} data;
-	};
-} BMSCanData;
+    uint8_t emEnable:1;         // EM enabled (1), or not enabled (0)
+    uint8_t reserved[7];
+}
+DCU_VCU_CanData;
+STATIC_ASSERT(sizeof(DCU_VCU_CanData) == CAN_MAX_BYTE_LEN, DCU_VCU_CanData_sizecheck);
+
+// DAQ to BMS packet
+typedef struct __packed
+{   
+    uint8_t critMotorTemp:1;     // Critical motor temperature reached (1), or not reached (0)
+    uint8_t reserved[7];
+}
+DAU_BMS_CanData;
 
 #endif /* CAN_COMM_H_ */
