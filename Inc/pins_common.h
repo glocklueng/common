@@ -36,9 +36,15 @@
 #define CAN_PORT            GPIOB
 
 // UART
+#ifdef USE_NUCLEO
+#define UART_RX             GPIO_PIN_3
+#define UART_TX             GPIO_PIN_2
+#define UART_PORT           GPIOA
+#else
 #define UART_RX             GPIO_PIN_11
 #define UART_TX             GPIO_PIN_10
 #define UART_PORT           GPIOB
+#endif
 
 // Processor actions
 #define IS_BUTTON_1_ON      (HAL_GPIO_ReadPin(BUTT1_PORT, BUTT1_PIN) == GPIO_PIN_SET)
