@@ -3,6 +3,11 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-void debug_init(void);
+#ifdef DEBUG_MODE
+#define formulaDBG(...) printf(__VA_ARGS__)
+#else
+#define formulaDBG(...) (void)0
+#endif
 
+void debug_init(void);
 #endif
