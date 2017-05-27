@@ -9,6 +9,5 @@
 #define formulaDBG(...) (void)0
 #endif
 
-void debug_init();
-
+void debug_init(void);
 #endif
