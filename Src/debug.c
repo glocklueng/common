@@ -88,6 +88,8 @@ void debug_init(void) {
     huart.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
     HAL_UART_Init(&huart);
 
+    // DMA strategy lifted from: https://stackoverflow.com/questions/24875873/stm32f4-uart-hal-driver
+
     hdma_usart.Instance = DMA1_Channel5;
     hdma_usart.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_usart.Init.PeriphInc = DMA_PINC_DISABLE;
@@ -170,5 +172,5 @@ __weak void executeSerialCommand(char str[]) {
 int _write(int file, char* data, int len) {
     HAL_UART_Transmit(&huart, (uint8_t*)data, len, DATA_SEND_TIMEOUT);
     return len;
-}x
+}
 
