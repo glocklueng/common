@@ -17,7 +17,7 @@ DMA_HandleTypeDef hdma_usart;
 #define UART_BAUD_RATE (115200)
 #define DATA_SEND_TIMEOUT (100)
 #else
-#define UART_BAUD_RATE (460800)
+#define UART_BAUD_RATE (115200)
 #define DATA_SEND_TIMEOUT (100)
 #endif
 
@@ -90,7 +90,11 @@ void debug_init(void) {
 
     // DMA strategy lifted from: https://stackoverflow.com/questions/24875873/stm32f4-uart-hal-driver
 
+#ifdef USE_NUCLEO
     hdma_usart.Instance = DMA1_Channel5;
+#else
+    hdma_usart.Instance = DMA1_Channel6;
+#endif
     hdma_usart.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_usart.Init.PeriphInc = DMA_PINC_DISABLE;
     hdma_usart.Init.MemInc = DMA_MINC_DISABLE;
