@@ -18,12 +18,47 @@
 // BMS to VCU packet
 typedef struct __packed
 {
+    uint16_t stateBatteryChargeHV:10;
+    uint16_t stateBatteryHealthHV:10;
+    uint16_t steateBatteryPowerHV:10;
+}
+BMS_batteryStatusHV_CanData;
+
+// to DCU to display voltage
+typedef struct __packed
+{
+    uint32_t voltageBatteryHV:18;
+    uint32_t currentDCBatteryHV:24;
+    uint32_t powerBatteryHV:18;
+}
+BMS_stateBatteryHV; 
+
+typedef struct __packed
+{
+    uint32_t voltageBusHV:18;
+    uint8_t stateContactorNegative:3;
+    uint8_t stateContactorPositive:3;
+}
+BMU_stateBusHV;
+
+typedef struct __packed
+{
+    uint16_t maxCurrentToMCs:10;
+    uint16_t bpsPressure:12;
+    uint8_t bpsFailed:1;
+}
+BMU_PowerAndBrake;
+
+/*
+typedef struct __packed
+{
     uint8_t energizeStatus:1;   // Energized (1) or not energized (0)
     uint8_t bpsPressed:1;       // Brake pressed (1), or not pressed (0)
     uint8_t bpsFailed:1;        // BPS failed (1), or not failed (0)
     uint8_t reserved[7];
 }
 BMS_VCU_CanData;
+*/
 STATIC_ASSERT(sizeof(BMS_VCU_CanData) == CAN_MAX_BYTE_LEN, BMS_VCU_CanData_sizecheck); // Make sure it's actually 8 bytes
 
 // BMS to DCU packet
