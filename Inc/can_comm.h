@@ -46,6 +46,7 @@ typedef struct __packed
     uint16_t maxCurrentToMCs:10;
     uint16_t bpsPressure:12;
     uint8_t bpsFailed:1;
+    uint8_t padding:1;
 }
 BMU_PowerAndBrake;
 
