@@ -17,7 +17,7 @@ DMA_HandleTypeDef hdma_usart;
 #define UART_BAUD_RATE (115200)
 #define DATA_SEND_TIMEOUT (100)
 #else
-#define UART_BAUD_RATE (115200)
+#define UART_BAUD_RATE (230400)
 #define DATA_SEND_TIMEOUT (100)
 #endif
 
@@ -135,6 +135,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
     else if (rxBuffer == '\n' || rxBuffer == '\r') // If Enter
     {
+        print_now("\n");
         strlcpy(commandStr, rxString, rxindex + 1);
         commandLen = rxindex;
         executeSerialCommand(rxString);
