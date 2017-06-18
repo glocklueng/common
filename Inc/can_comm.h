@@ -60,7 +60,7 @@ typedef struct __packed
 }
 BMS_VCU_CanData;
 */
-STATIC_ASSERT(sizeof(BMS_VCU_CanData) == CAN_MAX_BYTE_LEN, BMS_VCU_CanData_sizecheck); // Make sure it's actually 8 bytes
+// STATIC_ASSERT(sizeof(BMS_VCU_CanData) == CAN_MAX_BYTE_LEN, BMS_VCU_CanData_sizecheck); // Make sure it's actually 8 bytes
 
 // BMS to DCU packet
 typedef struct __packed
