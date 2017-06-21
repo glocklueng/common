@@ -47,6 +47,7 @@ typedef struct __packed
     uint16_t bpsPressure:12;
     uint8_t bpsFailed:1;
     uint8_t energizeStatus:1;
+    uint8_t padding[5];
 }
 BMU_PowerAndBrake; // goes from BMS to VCU
 
@@ -75,7 +76,7 @@ typedef struct __packed
 }
 BMS_VCU_CanData;
 */
-STATIC_ASSERT(sizeof(BMU_PowerAndBrake) == 3, BMS_VCU_CanData_sizecheck); // Make sure it's actually 3 bytes
+STATIC_ASSERT(sizeof(BMU_PowerAndBrake) == CAN_MAX_BYTE_LEN, BMS_VCU_CanData_sizecheck); // Make sure it's actually 3 bytes
 
 // BMS to DCU packet
 typedef struct __packed
@@ -99,6 +100,7 @@ STATIC_ASSERT(sizeof(DCU_BMS_CanData) == CAN_MAX_BYTE_LEN, DCU_BMS_CanData_sizec
 typedef struct __packed
 {
     uint8_t emEnable:1;         // EM enabled (1), or not enabled (0)
+    uint8_t emEnableAcked:1;
     uint8_t reserved[7];
 }
 DCU_VCU_CanData;
