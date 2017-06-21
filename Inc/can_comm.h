@@ -46,9 +46,24 @@ typedef struct __packed
     uint16_t maxCurrentToMCs:10;
     uint16_t bpsPressure:12;
     uint8_t bpsFailed:1;
-    uint8_t padding:1;
+    uint8_t energizeStatus:1;
 }
-BMU_PowerAndBrake;
+BMU_PowerAndBrake; // goes from BMS to VCU
+
+typedef struct __packed
+{
+    uint8_t intendToCharge:1;
+    uint8_t padding:7;
+}
+CC_IntentionToCharge; // CC to BMU
+
+typedef struct __packed
+{
+    uint8_t acceptChargeRequest:1;
+    uint8_t padding:7;
+}
+BMU_AcceptChargeRequest;
+
 
 /*
 typedef struct __packed
