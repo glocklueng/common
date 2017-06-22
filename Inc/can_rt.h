@@ -12,4 +12,8 @@ int32_t can_rt_tx(const uint16_t id, const uint8_t *data, const uint8_t length);
 
 int32_t can_rt_rx(uint16_t *id, uint8_t *data, uint8_t *length);
 
+void can_go_to_loopback(void);
+
+void can_leave_loopback(void);
+
 #endif // CAN_RT_H
