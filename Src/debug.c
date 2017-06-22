@@ -14,7 +14,7 @@ DMA_HandleTypeDef hdma_usart;
 #define UART_RX_SUBPRIORITY (0)
 
 #ifdef USE_NUCLEO
-#define UART_BAUD_RATE (115200)
+#define UART_BAUD_RATE (230400)
 #define DATA_SEND_TIMEOUT (100)
 #else
 #define UART_BAUD_RATE (230400)
