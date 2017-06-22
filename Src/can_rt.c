@@ -261,9 +261,8 @@ int32_t can_rt_tx(const uint16_t id, const uint8_t *data, const uint8_t length)
     CAN->sTxMailBox[0].TDTR = (uint32_t)(length);
 
     // Put data into mailbox 0
-    // CAN->sTxMailBox[0].TDLR = (uint32_t)data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
-    // CAN->sTxMailBox[0].TDHR = (uint32_t)data[4] | (data[5] << 8) | (data[6] << 16) | (data[7] << 24);
-    CAN->sTxMailBox[0].TDLR = (uint32_t)data[0];
+    CAN->sTxMailBox[0].TDLR = (uint32_t)data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+    CAN->sTxMailBox[0].TDHR = (uint32_t)data[4] | (data[5] << 8) | (data[6] << 16) | (data[7] << 24);
 
     // Set the identifier, it's the upper 11 bits, so have to shift left by 21, and request transmission
     CAN->sTxMailBox[0].TIR = ((uint32_t)id << 21 | CAN_TI0R_TXRQ);
