@@ -46,7 +46,7 @@ typedef struct __packed
     uint16_t maxCurrentToMCs:10;
     uint16_t bpsPressure:12;
     uint8_t bpsFailed:1;
-    uint8_t energizeStatus:1;
+    uint8_t hvEnable:1;
     uint8_t padding[5];
 }
 BMU_PowerAndBrake; // goes from BMS to VCU
