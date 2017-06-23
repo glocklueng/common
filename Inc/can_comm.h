@@ -119,14 +119,4 @@ typedef struct __packed
 DAU_BMS_CanData;
 STATIC_ASSERT(sizeof(DAU_BMS_CanData) == CAN_MAX_BYTE_LEN, DAU_BMS_CanData_sizecheck);
 
-// VCU to DCU packet
-typedef struct __packed
-{
-    uint8_t isVehicleOn:1;
-    uint8_t reserved[7];
-}
-VCU_DCU_CanData;
-STATIC_ASSERT(sizeof(VCU_DCU_CanData) == CAN_MAX_BYTE_LEN, VCU_DCU_CanData_sizecheck);
-
-
 #endif /* CAN_COMM_H_ */
