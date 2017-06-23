@@ -90,7 +90,8 @@ STATIC_ASSERT(sizeof(BMS_DCU_CanData) == CAN_MAX_BYTE_LEN, BMS_DCU_CanData_sizec
 // DCU to BMS packet
 typedef struct __packed
 {
-    uint8_t hvEnable:1;         // HV enabled (1), or not enabled (0)
+    uint8_t hvEnableFromDCU:1;         // HV enabled (1), or not enabled (0)
+    uint8_t hvEnableFromBMS:1;         // HV enabled (1), or not enabled (0)
     uint8_t reserved[7];
 }
 DCU_BMS_CanData;
@@ -99,8 +100,8 @@ STATIC_ASSERT(sizeof(DCU_BMS_CanData) == CAN_MAX_BYTE_LEN, DCU_BMS_CanData_sizec
 // DCU to VCU packet
 typedef struct __packed
 {
-    uint8_t emEnable:1;         // EM enabled (1), or not enabled (0)
-    uint8_t emEnableAcked:1;
+    uint8_t emEnableFromDCU:1;         // EM enabled (1), or not enabled (0)
+    uint8_t emEnableFromBMS:1;
     uint8_t reserved[7];
 }
 DCU_VCU_CanData;
