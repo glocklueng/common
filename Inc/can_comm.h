@@ -97,6 +97,7 @@ typedef struct __packed
 {
     uint8_t emToggleFromDCU:1;         // EM enabled (1), or not enabled (0)
     uint8_t emEnableFromVCU:1;
+    uint8_t fromVCU:1;
     uint8_t reserved[7];
 }
 DCU_VCU_CanData;
