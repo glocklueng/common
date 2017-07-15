@@ -61,4 +61,13 @@ typedef struct __packed
 }
 DAU_BMS_CanData;
 
+typedef struct __packed
+{
+    uint16_t stator_a1;
+    uint16_t stator_a2;
+    uint16_t stator_b1;
+    uint16_t stator_b2;
+}
+DAU_VCU_CanData;
+
 #endif /* CAN_COMM_H_ */
