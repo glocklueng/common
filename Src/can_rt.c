@@ -1,12 +1,48 @@
 #include <stm32f0xx.h>
 #include "stm32f0xx_hal.h"
 #include "stdint.h"
+#include "stdbool.h"
 
 #include "pins_common.h"
 #include "can_rt.h"
 #include "assert.h"
 
 static int32_t can_rt_addfilterids(const uint16_t *filters, const uint16_t filter_num);
+
+void can_go_to_loopback(void) {
+    // enter initialization mode, turn on loopback, leave initializtion
+
+    // Wait for hardware to enter initialization mode. Takes 400ns, TODO: add 10us timeout
+    CAN->MCR |= CAN_MCR_INRQ;
+
+    // Wait for hardware to enter initialization mode. Takes 400ns, TODO: add 10us timeout 
+    while((CAN->MSR & CAN_MSR_INAK) != CAN_MSR_INAK);
+
+     // Set loopback mode for testing, has to be disabled later
+    CAN->BTR |= CAN_BTR_LBKM;
+
+    // Switch hardware to normal mode and wait for acknowledge
+    CAN->MCR &=~ CAN_MCR_INRQ;
+
+    // Wait for acknowledge, takes 30uS at given baud rate, TODO: add 1000us timeout since this depends on bus being idle
+    while ((CAN->MSR & CAN_MSR_INAK) == CAN_MSR_INAK);
+}
+
+void can_leave_loopback(void) {
+    // enter initialization mode, turn off loopback, leave initialization
+
+    // Go to bxCAN init mode again and wait for acknowledge
+    CAN->MCR |= CAN_MCR_INRQ;
+
+    while((CAN->MSR & CAN_MSR_INAK) != CAN_MSR_INAK);
+
+    // Disable the loopback mode so we can actulally receive external messages
+    CAN->BTR &= ~CAN_BTR_LBKM;
+
+    // Go to bxCAN normal mode and wait for acknowledge, takes 30us, TODO: add 1000us timeout since this depends on bus being idle
+    CAN->MCR &= ~CAN_MCR_INRQ;
+    while ((CAN->MSR & CAN_MSR_INAK) == CAN_MSR_INAK);
+}
 
 int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
 {
@@ -21,7 +57,7 @@ int32_t can_rt_setup(const uint16_t *filters, const uint16_t filter_num)
     GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF4_CAN;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -209,7 +245,7 @@ int32_t can_rt_tx(const uint16_t id, const uint8_t *data, const uint8_t length)
 {
     // Validate parameters
     if( c_assert(data) ||
-        c_assert(length < CAN_RT_MAX_BYTES_PER_MESSAGE) ||
+        c_assert(length <= CAN_RT_MAX_BYTES_PER_MESSAGE) ||
         c_assert(id < (2 << 11)))
     {
         return 1;

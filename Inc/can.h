@@ -12,6 +12,9 @@
 #include "stdbool.h"
 #include "can_comm.h"
 
+#define CAN_INTERRUPT               CEC_CAN_IRQn
+#define CAN_PRIORITY_BASE           0
+
 void setupCanFilters();         // You must implement this in can_data.c
 
 #define NUM_ID_BIT_SHIFT        5
