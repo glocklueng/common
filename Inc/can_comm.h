@@ -47,7 +47,8 @@ typedef struct __packed
     uint16_t bpsPressure:12;
     uint8_t bpsFailed:1;
     uint8_t hvEnable:1;
-    uint8_t padding[5];
+    uint8_t stateBatteryPowerHV:7;
+    uint8_t padding[4];
 }
 BMU_PowerAndBrake; // goes from BMS to VCU
 
