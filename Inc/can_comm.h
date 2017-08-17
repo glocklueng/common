@@ -20,7 +20,7 @@ typedef struct __packed
 {
     uint16_t stateBatteryChargeHV:10;
     uint16_t stateBatteryHealthHV:10;
-    uint16_t steateBatteryPowerHV:10;
+    uint16_t stateBatteryPowerHV:10;
 }
 BMS_batteryStatusHV_CanData;
 
