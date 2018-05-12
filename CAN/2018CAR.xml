@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testmodule title="Auto-generated" version="">
+    <testgroup title="">
+        <conditions>
+            <messages_known/>
+            <error_frame_check max="0"/>
+
+            <!-- begin generate block for node ChargeCart -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="ChargeCart"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="ChargeCart"/>
+            </dlc_ok>
+
+
+            <!-- end generate block for node ChargeCart -->
+
+
+            <!-- begin generate block for node WSBRR -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="WSBRR"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="WSBRR"/>
+            </dlc_ok>
+
+            <value_valid>
+                <cansignal name="SpeedWheelRightBack" msg="WSBRR_WheelData">
+                    <range><from>-30.0003</from><to>150</to></range>
+                </cansignal>
+            </value_valid>
+
+            <!-- end generate block for node WSBRR -->
+
+
+            <!-- begin generate block for node WSBRL -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="WSBRL"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="WSBRL"/>
+            </dlc_ok>
+
+            <value_valid>
+                <cansignal name="SpeedWheelLeftBack" msg="WSBRL_WheelData">
+                    <range><from>-30.0003</from><to>150</to></range>
+                </cansignal>
+            </value_valid>
+
+            <!-- end generate block for node WSBRL -->
+
+
+            <!-- begin generate block for node WSBFR -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="WSBFR"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="WSBFR"/>
+            </dlc_ok>
+
+            <value_valid>
+                <cansignal name="SpeedWheelRightFront" msg="WSBFR_WheelData">
+                    <range><from>-30.0003</from><to>150</to></range>
+                </cansignal>
+            </value_valid>
+
+            <!-- end generate block for node WSBFR -->
+
+
+            <!-- begin generate block for node WSBFL -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="WSBFL"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="WSBFL"/>
+            </dlc_ok>
+
+            <value_valid>
+                <cansignal name="SpeedWheelLeftFront" msg="WSBFL_WheelData">
+                    <range><from>-30.0003</from><to>150</to></range>
+                </cansignal>
+            </value_valid>
+
+            <!-- end generate block for node WSBFL -->
+
+
+            <!-- begin generate block for node VCU_F7 -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="VCU_F7"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="VCU_F7"/>
+            </dlc_ok>
+
+
+            <!-- end generate block for node VCU_F7 -->
+
+
+            <!-- begin generate block for node BMU -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="BMU"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="BMU"/>
+            </dlc_ok>
+
+            <value_valid>
+                <cansignal name="voltageBusHV" msg="BMU_stateBusHV">
+                    <range><from>0</from><to>419430</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="stateBatteryChargeHV" msg="BMU_batteryStatusHV">
+                    <range><from>0</from><to>102.3</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="stateBatteryHealthHV" msg="BMU_batteryStatusHV">
+                    <range><from>0</from><to>100</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="stateBatteryPowerHV" msg="BMU_batteryStatusHV">
+                    <range><from>0</from><to>409.5</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempCellMax" msg="BMU_batteryStatusHV">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempCellMin" msg="BMU_batteryStatusHV">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="voltageBatteryHV" msg="BMU_stateBatteryHV">
+                    <range><from>0</from><to>1.04858e+006</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="currentDCBatteryHV" msg="BMU_stateBatteryHV">
+                    <range><from>-2097.15</from><to>2097.15</to></range>
+                </cansignal>
+            </value_valid>
+
+            <!-- end generate block for node BMU -->
+
+
+            <!-- begin generate block for node PDU -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="PDU"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="PDU"/>
+            </dlc_ok>
+
+            <value_valid>
+                <cansignal name="currentOutputDCDC" msg="PDU_DCDC_Status">
+                    <range><from>0</from><to>60</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="stateBatteryChargeLV" msg="PDU_batteryStatusLV">
+                    <range><from>0</from><to>102.3</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="stateBatteryHealthLV" msg="PDU_batteryStatusLV">
+                    <range><from>0</from><to>100</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="stateBatteryPowerLV" msg="PDU_batteryStatusLV">
+                    <range><from>0</from><to>100</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="voltageBatteryLV" msg="PDU_batteryStatusLV">
+                    <range><from>0</from><to>16383</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="voltageBusLV" msg="PDU_batteryStatusLV">
+                    <range><from>0</from><to>16383</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="voltageBatteryLV" msg="PDU_StateBatteryLV">
+                    <range><from>0</from><to>16383</to></range>
+                </cansignal>
+            </value_valid>
+
+            <!-- end generate block for node PDU -->
+
+
+            <!-- begin generate block for node DCU -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="DCU"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="DCU"/>
+            </dlc_ok>
+
+
+            <!-- end generate block for node DCU -->
+
+
+            <!-- begin generate block for node MCRight -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="MCRight"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="MCRight"/>
+            </dlc_ok>
+
+            <value_valid>
+                <cansignal name="SpeedMotorRight" msg="SpeedFeedbackRight">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempMotorDeltaRight" msg="TempMotorRight">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempMotorRight" msg="TempMotorRight">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="StateInverterRight" msg="TempInverterRight">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempInverterDeltaRight" msg="TempInverterRight">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempInverterRight" msg="TempInverterRight">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="InverterAUTHSEEDRight" msg="TempInverterRight">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+
+            <!-- end generate block for node MCRight -->
+
+
+            <!-- begin generate block for node MCLeft -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="MCLeft"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="MCLeft"/>
+            </dlc_ok>
+
+            <value_valid>
+                <cansignal name="SpeedMotorLeft" msg="SpeedFeedbackLeft">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempMotorDeltaLeft" msg="TempMotorLeft">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempMotorLeft" msg="TempMotorLeft">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="StateInverterLeft" msg="TempInverterLeft">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempInverterDeltaLeft" msg="TempInverterLeft">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="TempInverterLeft" msg="TempInverterLeft">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+            <value_valid>
+                <cansignal name="InverterAUTHSEEDLeft" msg="TempInverterLeft">
+                    <range><from>-38</from><to>217.75</to></range>
+                </cansignal>
+            </value_valid>
+
+            <!-- end generate block for node MCLeft -->
+
+
+            <!-- begin generate block for node VCU_BeagleBone -->
+
+            <occurrencetime_rel min="1" max="1.1"> <!-- values from the generator-->
+                <node name="VCU_BeagleBone"/>
+            </occurrencetime_rel>
+
+            <dlc_ok dir="tx">
+                <node name="VCU_BeagleBone"/>
+            </dlc_ok>
+
+
+            <!-- end generate block for node VCU_BeagleBone -->
+
+        </conditions>
+        <testcase ident="TC" title="Wait until end and supervise the conditions">
+              <untilend title="Wait until end and supervise the conditions"/>
+        </testcase>
+    </testgroup>
+</testmodule>

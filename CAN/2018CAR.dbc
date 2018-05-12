@@ -265,11 +265,17 @@ BO_ 0 WSBFR_WheelData: 3 WSBFR
 
 
 
-CM_ BU_ DCU "Driver Contol Unit";
-CM_ BU_ PDU "Power Distribution Unit";
-CM_ BU_ BMU "Battery Measurment Unit";
-CM_ BU_ VCU_F7 "Vehicle Control Unit";
-CM_ BU_ WSBFL "Wheel Sensor Board Front Left";
+CM_ BU_ MCLeft "5_2_Left Inverter";
+CM_ BU_ MCRight "6_2_Right Inverter";
+CM_ BU_ DCU "7_3_Driver Contol Unit";
+CM_ BU_ PDU "3__Power Distribution Unit";
+CM_ BU_ BMU "1_1_Battery Managment Unit";
+CM_ BU_ VCU_F7 "2_1_Vehicle Control Unit";
+CM_ BU_ WSBFL "8_4_Wheel Sensor Board Front Left";
+CM_ BU_ WSBFR "9_4_Wheel Sensor Board Front Right";
+CM_ BU_ WSBRL "10_4_Wheel Sensor Board Rear Left";
+CM_ BU_ WSBRR "11_4_Wheel Sensor Board Rear Right";
+CM_ BU_ ChargeCart "4_3_Charge Cart PCB";
 CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
 CM_ BO_ 33 "VERSION";
 CM_ BO_ 32 "VERSION";
