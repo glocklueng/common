@@ -25,7 +25,9 @@ commonDir = 'common'
 genDir = os.path.join(commonDir, 'Gen')
 
 genIncDir = os.path.join(genDir, 'Inc')
+genSrcDir = os.path.join(genDir, 'Src')
 create_dir(genIncDir) # Create genIncDir if it doesn't already exist
+create_dir(genSrcDir) # Create genSrcDir if it doesn't already exist
 
 ScriptsDir = os.path.join(commonDir, 'Scripts')
 
@@ -35,7 +37,7 @@ dataDir = os.path.join(commonDir, 'data')
 dbFile = os.path.join(dataDir, '2018CAR.dbc')
 
 headerFile = os.path.join(genIncDir, nodeName + '_can.h')
-sourceFile = os.path.join(genIncDir, nodeName + '_can.c')
+sourceFile = os.path.join(genSrcDir, nodeName + '_can.c')
 
 db = cantools.db.load_file(dbFile)
 
