@@ -5,6 +5,19 @@ import os
 from pprint import pprint
 import subprocess
 import sys
+import errno
+
+def create_dir(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+def fWrite(string, fileHandle):
+    fileHandle.write(string + '\n')
 
 nodeName = sys.argv[1]
 
@@ -40,44 +53,45 @@ def fWrite(string, fileHandle):
     fileHandle.write(string + '\n')
 
 def generateDepedencyFile(headerFile, target):
-    with open(depFile, 'w') as depFileHandle:
+    with open(depFile, 'w+') as depFileHandle:
         fWrite('{headerFile}: {dir}/generateCANHeadder.py {dbFile}'.format(headerFile=headerFile, dbFile=dbFile, dir=ScriptsDir), depFileHandle)
         fWrite('	{dir}/generateCANHeadder.py {target}'.format(target=target, dir=ScriptsDir), depFileHandle)
 
 
+headerFileHandle = open(headerFile, "w+")
+sourceFileHandle = open(sourceFile, "w+")
 
 #make .h file
 
-sys.stdout = open(headerFile, "w")
-print("#ifndef __"+nodeName+"_can_H\n#define __"+nodeName+"_can_H\n")
-print("#include \"can.h\"")
+create_dir(genIncDir)
+fWrite("#ifndef __"+nodeName+"_can_H\n#define __"+nodeName+"_can_H\n", headerFileHandle);
+fWrite("#include \"can.h\"", headerFileHandle);
 
-print('//Message Filtring')
+fWrite('//Message Filtering', headerFileHandle);
 nodeAddress = 0
 messageGroups = list()
 
 for node in db.nodes:
 	if node.name == nodeName:
 		nodeAddress = node.comment.split("_")[0]
-		print('#define CAN_NODE_ADDRESS ' + nodeAddress)
+		fWrite('#define CAN_NODE_ADDRESS ' + nodeAddress, headerFileHandle);
 		for messageGroup in node.comment.split("_")[1].split(","):
 			if messageGroup != "":
-				print('#define CAN_NODE_MESSAGE_GROUP_'+messageGroup)
+				fWrite('#define CAN_NODE_MESSAGE_GROUP_'+messageGroup, headerFileHandle);
 				messageGroups.append(messageGroup)
-print('')
+fWrite('', headerFileHandle);
 
 
-print("#endif /*__"+nodeName+"_can_H */")
+fWrite("#endif /*__"+nodeName+"_can_H */", headerFileHandle);
 
 
-sys.stdout = open(sourceFile, "w")
-print('//DBC version:')
-print('int DBCVersion = '+db.version+';');
-print('char gitCommit[] = \"'+gitCommit+'\";')
+fWrite('//DBC version:', sourceFileHandle)
+fWrite('int DBCVersion = '+db.version+';', sourceFileHandle)
+fWrite('char gitCommit[] = \"'+gitCommit+'\";', sourceFileHandle)
 
-print('//'+nodeName+' can headder')
-print("#include \""+nodeName+"_can.h\"")
-print('#include \"CRC_CALC.h\"')
+fWrite('//'+nodeName+' can headder', sourceFileHandle)
+fWrite("#include \""+nodeName+"_can.h\"", sourceFileHandle)
+fWrite('#include \"CRC_CALC.h\"', sourceFileHandle)
 
 nodeList = list()
 
@@ -98,20 +112,23 @@ for mes in db.messages:
 		messages.append(mes)
 
 
-print('__weak int sendCanMessage(int id,int length,void *data);')	
-print('// Incoming variables')
+fWrite('__weak int sendCanMessage(int id,int length,void *data);', sourceFileHandle)
+fWrite('__weak int sendCanMessage(int id,int length,void *data);', headerFileHandle)
+fWrite('// Incoming variables', sourceFileHandle)
 for signal in variables:
 	type = "int "
 	if((signal.is_float)):
-		type = "float " 
-	print('volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale))
-	print('__weak void '+ signal.name+'Recived('+type+ 'newValue)\n{')
-	print("	newValue = newValue * "+str(signal.scale)+";")
-	print("	newValue = newValue + "+str(signal.offset)+";")
-	print("	"+signal.name + " = newValue;")
-	print("}\n")		
+		type = "float "
+	fWrite('volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), sourceFileHandle)
+	fWrite('extern volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), headerFileHandle)
+	fWrite('void '+ signal.name+'Received('+type+ 'newValue);', headerFileHandle)
+	fWrite('__weak void '+ signal.name+'Received('+type+ 'newValue)\n{', sourceFileHandle)
+	fWrite("	newValue = newValue * "+str(signal.scale)+";", sourceFileHandle)
+	fWrite("	newValue = newValue + "+str(signal.offset)+";", sourceFileHandle)
+	fWrite("	"+signal.name + " = newValue;", sourceFileHandle)
+	fWrite("}\n", sourceFileHandle)
 
-print('// Outgoing variables')
+fWrite('// Outgoing variables', sourceFileHandle)
 for mes in db.messages:
 	if nodeName in mes.nodes:
 		if mes.comment == 'PROCAN':
@@ -123,156 +140,165 @@ for mes in db.messages:
 				if signal.comment != "PROCAN":
 					type = "int "
 					if((signal.is_float)):
-						type = "float " 
-					print('volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale))
-					print('__weak '+type+ signal.name+'Sending()\n{')
-					print('	'+type+'sendValue = '+ signal.name+';')
-					print("	sendValue = sendValue - "+str(signal.offset)+";")
-					print("	sendValue = sendValue / "+str(signal.scale)+";")
-					print("	return sendValue;")
-					print("}\n")
-									
-	
+						type = "float "
+					fWrite('extern volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), headerFileHandle)
+					fWrite('volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), sourceFileHandle)
+					fWrite(type+ signal.name+'Sending();', headerFileHandle)
+					fWrite('__weak '+type+ signal.name+'Sending()\n{', sourceFileHandle)
+					fWrite('	'+type+'sendValue = '+ signal.name+';', sourceFileHandle)
+					fWrite("	sendValue = sendValue - "+str(signal.offset)+";", sourceFileHandle)
+					fWrite("	sendValue = sendValue / "+str(signal.scale)+";", sourceFileHandle)
+					fWrite("	return sendValue;", sourceFileHandle)
+					fWrite("}\n", sourceFileHandle)
 
-print('')
-print('// PRO_CAN ')
-for strings in variablesPROCAN:
-	print(strings)
-print('')
 
-print('int init_can_driver(){')
-print('	generate_CRC_lookup_table();')
-print('	return 0;')
-print('}')
-print('')
+
+fWrite('', sourceFileHandle)
+fWrite('// PRO_CAN ', sourceFileHandle)
+for string in variablesPROCAN:
+	fWrite('extern ' + string, headerFileHandle)
+	fWrite(string, sourceFileHandle)
+fWrite('', sourceFileHandle)
+
+fWrite('int init_can_driver();', headerFileHandle)
+fWrite('int init_can_driver(){', sourceFileHandle)
+fWrite('	generate_CRC_lookup_table();', sourceFileHandle)
+fWrite('	return 0;', sourceFileHandle)
+fWrite('}', sourceFileHandle)
+fWrite('', sourceFileHandle)
 
 messagesREL = list()
 for mes in db.messages:
 	if nodeName in mes.nodes:
 		messagesREL.append(mes)
 for message in messagesREL:
-	print('struct ' + message.name + '{') 
+	fWrite('struct ' + message.name + '{', headerFileHandle)
 	totalSize = message.length*8;
 	currentPos = 0;
 	if message.comment == 'VERSION':
-		print('	int DBC : 8;')
+		fWrite('	int DBC : 8;', headerFileHandle)
 		for i  in range(0,7):
-			print('	char git'+str(i)+' : 8;')
+			fWrite('	char git'+str(i)+' : 8;', headerFileHandle)
 
 
 	else:
 		for signal in message.signals:
 			if signal.start != currentPos:
-				print('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';')
+				fWrite('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', headerFileHandle)
 			if signal.is_signed	:
-				print('	         int ' + signal.name + ' : ' + str(signal.length) + ';')
+				fWrite('	         int ' + signal.name + ' : ' + str(signal.length) + ';', headerFileHandle)
 			else :
-				print('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';')
+				fWrite('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';', headerFileHandle)
 			currentPos = signal.start + signal.length
 		if currentPos != totalSize:
-			print('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';')
-	print('};') 
-	print('') 
-print('') 
+			fWrite('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';', headerFileHandle)
+	fWrite('};', headerFileHandle)
+	fWrite('', headerFileHandle)
+fWrite('', headerFileHandle)
 
 
 for message in messages:
-	print('struct ' + message.name + ' {') 
+	fWrite('struct ' + message.name + ' {', headerFileHandle)
 	totalSize = message.length*8;
 	currentPos = 0;
 	for signal in message.signals:
 		if signal.start != currentPos:
-			print('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';')
+			fWrite('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', headerFileHandle)
 		if signal.is_signed	:
-			print('		     int ' + signal.name + ' : ' + str(signal.length) + ';')
+			fWrite('		     int ' + signal.name + ' : ' + str(signal.length) + ';', headerFileHandle)
 		else :
-			print('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';')
+			fWrite('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';', headerFileHandle)
 		currentPos = signal.start + signal.length
 	if currentPos != totalSize:
-		print('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';')
-	print('};') 
-	print('') 
+		fWrite('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';', headerFileHandle)
+	fWrite('};', headerFileHandle)
+	fWrite('', headerFileHandle)
 
-print('int parseCANData(int id, void * data) {') 
-print('	switch(id) {') 
+fWrite('int parseCANData(int id, void * data);', headerFileHandle)
+fWrite('int parseCANData(int id, void * data) {', sourceFileHandle)
+fWrite('	switch(id) {', sourceFileHandle)
 for message in messages:
-	print('		case '+ str(message.frame_id) + ' : // '+str(message.name)) 
+	fWrite('		case '+ str(message.frame_id) + ' : // '+str(message.name), sourceFileHandle)
 	# for signal in message.signals:
-	print('		{') 
-	
-	print('			struct ' + message.name + ' *new_'+message.name +' = data;')
+	fWrite('		{', sourceFileHandle)
+
+	fWrite('			struct ' + message.name + ' *new_'+message.name +' = data;', sourceFileHandle)
 	for signal in message.signals:
 		if nodeName in signal.nodes:
-			print('			'+signal.name+ 'Recived(new_'+message.name +'->'+ signal.name+');')
+			fWrite('			'+signal.name+ 'Recived(new_'+message.name +'->'+ signal.name+');', sourceFileHandle)
 
-	print('			break;') 
-	print('		}')
-print('	}')
-print('	return(0);')  
-print('}') 
+	fWrite('			break;', sourceFileHandle)
+	fWrite('		}', sourceFileHandle)
+fWrite('	}', sourceFileHandle)
+fWrite('	return(0);', sourceFileHandle)
+fWrite('}', sourceFileHandle)
 
 messagesTransmit = list()
 
 for mes in db.messages:
 	if nodeName in mes.nodes:
-		messagesTransmit.append(mes) 
+		messagesTransmit.append(mes)
 for message in messagesTransmit:
-	print("int sendCAN_" + message.name +"(){")
-	print('	struct ' + message.name + ' new_'+message.name +';')
+	fWrite("int sendCAN_" + message.name +"();", headerFileHandle)
+	fWrite("int sendCAN_" + message.name +"(){", sourceFileHandle)
+	fWrite('	struct ' + message.name + ' new_'+message.name +';', sourceFileHandle)
 	if message.comment == 'VERSION':
-		print('	new_'+message.name +'.DBC = DBCVersion;')
+		fWrite('	new_'+message.name +'.DBC = DBCVersion;', sourceFileHandle)
 		for i  in range(0,7):
-			print('	new_'+message.name +'.git'+str(i)+' = gitCommit['+str(i)+'];')
+			fWrite('	new_'+message.name +'.git'+str(i)+' = gitCommit['+str(i)+'];', sourceFileHandle)
 	else:
 		for signal in message.signals:
 			if signal.comment != 'PROCAN':
-				print('	new_'+message.name +'.'+signal.name+' = '+signal.name+'Sending();')
-				
+				fWrite('	new_'+message.name +'.'+signal.name+' = '+signal.name+'Sending();', sourceFileHandle)
+
 		if message.comment == 'PROCAN':
-			print('	new_'+message.name +'.PRO_CAN_COUNT= '+message.name+'_PRO_CAN_COUNT++;')
-			print('	'+message.name+'_PRO_CAN_COUNT = '+message.name+'_PRO_CAN_COUNT % 16;')
-			print('	new_'+message.name +'.PRO_CAN_CRC= calculate_base_CRC((void *) &new_'+message.name+')^'+message.name+'_PRO_CAN_SEED;')
-	print('	return sendCanMessage('+str(message.frame_id)+','+str(message.length)+',(uint8_t *) &new_'+message.name +');')
- 	print("}")
+			fWrite('	new_'+message.name +'.PRO_CAN_COUNT= '+message.name+'_PRO_CAN_COUNT++;', sourceFileHandle)
+			fWrite('	'+message.name+'_PRO_CAN_COUNT = '+message.name+'_PRO_CAN_COUNT % 16;', sourceFileHandle)
+			fWrite('	new_'+message.name +'.PRO_CAN_CRC= calculate_base_CRC((void *) &new_'+message.name+')^'+message.name+'_PRO_CAN_SEED;', sourceFileHandle)
+	fWrite('	return sendCanMessage('+str(message.frame_id)+','+str(message.length)+',(uint8_t *) &new_'+message.name +');', sourceFileHandle)
+ 	fWrite("}", sourceFileHandle)
 
 
-print('__weak void configCANFilters(CAN_HandleTypeDef* canHandle)\n{')
-print('	CAN_FilterConfTypeDef  sFilterConfig;')
-print('	sFilterConfig.FilterNumber = 0;')
-print('	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;')
-print('	sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;')
-print('	sFilterConfig.FilterIdHigh = 0x0000;')
-print('	sFilterConfig.FilterIdLow = 0x0000 + ((CAN_NODE_ADDRESS)<<8);')
-print('	sFilterConfig.FilterMaskIdHigh = 0x0000;')
-print('	sFilterConfig.FilterMaskIdLow = 0xFF00;')
-print('	sFilterConfig.FilterFIFOAssignment = 0;')
-print('	sFilterConfig.FilterActivation = ENABLE;')
-print('	sFilterConfig.BankNumber = 0;\n')
-print('	if(HAL_CAN_ConfigFilter(canHandle, &sFilterConfig) != HAL_OK)')
-print('	{')
-print('	  Error_Handler();')
-print('	}')
+fWrite('void configCANFilters(CAN_HandleTypeDef* canHandle);', headerFileHandle)
+fWrite('__weak void configCANFilters(CAN_HandleTypeDef* canHandle)\n{', sourceFileHandle)
+fWrite('	CAN_FilterConfTypeDef  sFilterConfig;', sourceFileHandle)
+fWrite('	sFilterConfig.FilterNumber = 0;', sourceFileHandle)
+fWrite('	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;', sourceFileHandle)
+fWrite('	sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;', sourceFileHandle)
+fWrite('	sFilterConfig.FilterIdHigh = 0x0000;', sourceFileHandle)
+fWrite('	sFilterConfig.FilterIdLow = 0x0000 + ((CAN_NODE_ADDRESS)<<8);', sourceFileHandle)
+fWrite('	sFilterConfig.FilterMaskIdHigh = 0x0000;', sourceFileHandle)
+fWrite('	sFilterConfig.FilterMaskIdLow = 0xFF00;', sourceFileHandle)
+fWrite('	sFilterConfig.FilterFIFOAssignment = 0;', sourceFileHandle)
+fWrite('	sFilterConfig.FilterActivation = ENABLE;', sourceFileHandle)
+fWrite('	sFilterConfig.BankNumber = 0;\n', sourceFileHandle)
+fWrite('	if(HAL_CAN_ConfigFilter(canHandle, &sFilterConfig) != HAL_OK)', sourceFileHandle)
+fWrite('	{', sourceFileHandle)
+fWrite('	  Error_Handler();', sourceFileHandle)
+fWrite('	}', sourceFileHandle)
 
-print('\n	sFilterConfig.FilterIdLow = 0x0000 + ('+str(0xFF)+'<<8);')
-print('	sFilterConfig.FilterFIFOAssignment = 1;')
-print('	sFilterConfig.BankNumber = 1;\n')
-print('	if(HAL_CAN_ConfigFilter(canHandle, &sFilterConfig) != HAL_OK)')
-print('	{')
-print('	  Error_Handler();')
-print('	}')
+fWrite('\n	sFilterConfig.FilterIdLow = 0x0000 + ('+str(0xFF)+'<<8);', sourceFileHandle)
+fWrite('	sFilterConfig.FilterFIFOAssignment = 1;', sourceFileHandle)
+fWrite('	sFilterConfig.BankNumber = 1;\n', sourceFileHandle)
+fWrite('	if(HAL_CAN_ConfigFilter(canHandle, &sFilterConfig) != HAL_OK)', sourceFileHandle)
+fWrite('	{', sourceFileHandle)
+fWrite('	  Error_Handler();', sourceFileHandle)
+fWrite('	}', sourceFileHandle)
 i = 1
 for messageGroup in messageGroups:
 	i = i + 1
-	print('\n	sFilterConfig.FilterIdLow = 0x0000 + ('+messageGroup+'<<12);')
-	print('	sFilterConfig.FilterFIFOAssignment = 2;')
-	print('	sFilterConfig.BankNumber = '+str(i)+';\n')
-	print('	if(HAL_CAN_ConfigFilter(canHandle, &sFilterConfig) != HAL_OK)')
-	print('	{')
-	print('	  Error_Handler();')
-	print('	}')
-	
-print('}')
+	fWrite('\n	sFilterConfig.FilterIdLow = 0x0000 + ('+messageGroup+'<<12);', sourceFileHandle)
+	fWrite('	sFilterConfig.FilterFIFOAssignment = 2;', sourceFileHandle)
+	fWrite('	sFilterConfig.BankNumber = '+str(i)+';\n', sourceFileHandle)
+	fWrite('	if(HAL_CAN_ConfigFilter(canHandle, &sFilterConfig) != HAL_OK)', sourceFileHandle)
+	fWrite('	{', sourceFileHandle)
+	fWrite('	  Error_Handler();', sourceFileHandle)
+	fWrite('	}', sourceFileHandle)
 
+fWrite('}', sourceFileHandle)
+
+headerFileHandle.close()
+sourceFileHandle.close()
 
 generateDepedencyFile(headerFile, nodeName)
 generateDepedencyFile(sourceFile, nodeName)
