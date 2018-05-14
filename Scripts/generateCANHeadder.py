@@ -25,6 +25,7 @@ commonDir = 'common'
 genDir = os.path.join(commonDir, 'Gen')
 
 genIncDir = os.path.join(genDir, 'Inc')
+create_dir(genIncDir) # Create genIncDir if it doesn't already exist
 
 ScriptsDir = os.path.join(commonDir, 'Scripts')
 
@@ -63,7 +64,6 @@ sourceFileHandle = open(sourceFile, "w+")
 
 #make .h file
 
-create_dir(genIncDir)
 fWrite("#ifndef __"+nodeName+"_can_H\n#define __"+nodeName+"_can_H\n", headerFileHandle);
 fWrite("#include \"can.h\"", headerFileHandle);
 
