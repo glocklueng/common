@@ -102,6 +102,7 @@ nodeList = list()
 variables = list()
 messages = list()
 variablesPROCAN = list()
+variablesPROCANHeader = list()
 
 for mes in db.messages:
 	messageUseful = 0
@@ -133,6 +134,8 @@ for mes in db.messages:
 		if mes.comment == 'PROCAN':
 			variablesPROCAN.append('int '+mes.name+'_PRO_CAN_SEED = 127;');
 			variablesPROCAN.append('int '+mes.name+'_PRO_CAN_COUNT = 0;');
+			variablesPROCANHeader.append('int '+mes.name+'_PRO_CAN_SEED;');
+			variablesPROCANHeader.append('int '+mes.name+'_PRO_CAN_COUNT;');
 		if mes.comment != 'VERSION':
 
 			for signal in mes.signals:
@@ -155,8 +158,9 @@ for mes in db.messages:
 fWrite('', sourceFileHandle)
 fWrite('// PRO_CAN ', sourceFileHandle)
 for string in variablesPROCAN:
-	fWrite('extern ' + string, headerFileHandle)
 	fWrite(string, sourceFileHandle)
+for string in variablesPROCANHeader:
+	fWrite('extern ' + string, headerFileHandle)
 fWrite('', sourceFileHandle)
 
 fWrite('int init_can_driver();', headerFileHandle)
