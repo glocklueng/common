@@ -67,7 +67,7 @@ sourceFileHandle = open(sourceFile, "w+")
 #make .h file
 
 fWrite("#ifndef __"+nodeName+"_can_H\n#define __"+nodeName+"_can_H\n", headerFileHandle);
-fWrite("#include \"can.h\"", headerFileHandle);
+fWrite("#include \"stm32f0xx_hal.h\"", headerFileHandle);
 
 fWrite('//Message Filtering', headerFileHandle);
 nodeAddress = 0
@@ -84,7 +84,6 @@ for node in db.nodes:
 fWrite('', headerFileHandle);
 
 
-fWrite("#endif /*__"+nodeName+"_can_H */", headerFileHandle);
 
 
 fWrite('//DBC version:', sourceFileHandle)
@@ -114,8 +113,6 @@ for mes in db.messages:
 		messages.append(mes)
 
 
-fWrite('__weak int sendCanMessage(int id,int length,void *data);', sourceFileHandle)
-fWrite('__weak int sendCanMessage(int id,int length,void *data);', headerFileHandle)
 fWrite('// Incoming variables', sourceFileHandle)
 for signal in variables:
 	type = "int "
@@ -298,6 +295,7 @@ for messageGroup in messageGroups:
 	fWrite('	}', sourceFileHandle)
 
 fWrite('}', sourceFileHandle)
+fWrite("#endif /*__"+nodeName+"_can_H */", headerFileHandle);
 
 headerFileHandle.close()
 sourceFileHandle.close()
