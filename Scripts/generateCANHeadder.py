@@ -22,7 +22,7 @@ def fWrite(string, fileHandle):
 nodeName = sys.argv[1]
 
 commonDir = 'common'
-genDir = os.path.join(commonDir, 'Gen')
+genDir = 'Gen'
 
 genIncDir = os.path.join(genDir, 'Inc')
 genSrcDir = os.path.join(genDir, 'Src')
