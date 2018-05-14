@@ -228,7 +228,7 @@ for message in messages:
 	fWrite('			struct ' + message.name + ' *new_'+message.name +' = data;', sourceFileHandle)
 	for signal in message.signals:
 		if nodeName in signal.nodes:
-			fWrite('			'+signal.name+ 'Recived(new_'+message.name +'->'+ signal.name+');', sourceFileHandle)
+			fWrite('			'+signal.name+ 'Received(new_'+message.name +'->'+ signal.name+');', sourceFileHandle)
 
 	fWrite('			break;', sourceFileHandle)
 	fWrite('		}', sourceFileHandle)
