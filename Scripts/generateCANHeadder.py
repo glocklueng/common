@@ -8,7 +8,7 @@ import sys
 
 nodeName = sys.argv[1]
 
-commonDir = 'common-f7'
+commonDir = 'common'
 genDir = 'Gen'
 
 genIncDir = os.path.join(genDir, 'Inc')
