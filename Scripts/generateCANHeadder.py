@@ -17,7 +17,7 @@ ScriptsDir = os.path.join(commonDir, 'Scripts')
 
 depFile = os.path.join(genDir, 'canGen.d')
 
-dataDir = 'common-f7/data'
+dataDir = os.path.join(commonDir, 'data')
 dbFile = os.path.join(dataDir, '2018CAR.dbc')
 
 headerFile = os.path.join(genIncDir, nodeName + '_can.h')
