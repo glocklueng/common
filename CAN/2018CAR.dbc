@@ -40,9 +40,20 @@ VAL_TABLE_ DCDC_State 3 "Error" 2 "On" 1 "Off" 0 "Invalid" ;
 VAL_TABLE_ BMS_State 5 "Charging" 4 "Energized MC Enabled" 3 "Energized MC Disabled" 2 "Pre Charge" 1 "Standby Contactors off" 0 "Invalid" ;
 
 
+BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
+ SG_ Hartbeat_BMU : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Hartbeat_VCU_F7 : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Hartbeat_DCU : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Hartbeat_PDU : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Hartbeat_WSBFL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Hartbeat_WSBFR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Hartbeat_WSBRL : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Hartbeat_WSBRR : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Hartbeat_ChargeCart : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+
 BO_ 35 ChargeCart_ButtonEvents: 8 ChargeCart
- SG_ ButtonChargeStop : 1|1@1- (1,0) [0|0] "bool" BMU,VCU_BeagleBone
- SG_ ButtonChargeStart : 0|1@1- (1,0) [0|0] "bool" BMU,VCU_BeagleBone
+ SG_ ButtonChargeStop : 1|1@1- (1,0) [0|0] "bool"  BMU,VCU_BeagleBone
+ SG_ ButtonChargeStart : 0|1@1- (1,0) [0|0] "bool"  BMU,VCU_BeagleBone
 
 BO_ 2558526465 BMU_CellVoltage1: 8 BMU
  SG_ VoltageCell04 : 48|16@1+ (0.1,0) [0|6553.5] "mV"  ChargeCart,VCU_BeagleBone
@@ -441,7 +452,7 @@ BO_ 2147483657 WSBRL_WheelData: 8 WSBRL
  SG_ StrainXLeftRear : 18|12@1+ (1,0) [0|0] "raw"  VCU_BeagleBone
  SG_ SpeedWheelLeftBack : 0|18@1- (0.00068664812716723,60) [-30.0003433240632|149.999656675936] "rad/s"  VCU_BeagleBone,VCU_F7
 
-BO_ 8 PDU_StateBatteryLV: 2 PDU
+BO_ 8 PDU_StateBatteryLV: 8 PDU
  SG_ VoltageBatteryLV : 0|14@1+ (1,0) [0|16383] "mV"  VCU_BeagleBone,VCU_F7
 
 BO_ 7 BMU_stateBatteryHV: 8 BMU
@@ -449,7 +460,7 @@ BO_ 7 BMU_stateBatteryHV: 8 BMU
  SG_ CurrentDCBatteryHV : 20|22@1- (0.001,0) [-2097.152|2097.151] "Amps"  VCU_BeagleBone,VCU_F7
  SG_ VoltageBatteryHV : 0|20@1+ (1,0) [0|1048575] "mV"  VCU_BeagleBone,VCU_F7
 
-BO_ 6 PDU_ChannelStatus: 7 PDU
+BO_ 6 PDU_ChannelStatus: 8 PDU
  SG_ StatusPowerVCU : 48|4@1- (1,0) [0|0] ""  VCU_BeagleBone
  SG_ StatusPowerMCRight : 44|4@1- (1,0) [0|0] ""  VCU_BeagleBone
  SG_ StatusPowerMCLeft : 40|4@1- (1,0) [0|0] ""  VCU_BeagleBone
@@ -470,7 +481,7 @@ BO_ 5 PDU_batteryStatusLV: 8 PDU
  SG_ StateBatteryHealthLV : 10|10@1+ (0.1,0) [0|100] "%"  VCU_BeagleBone
  SG_ StateBatteryChargeLV : 0|10@1+ (0.1,0) [0|102.3] "%"  VCU_BeagleBone
 
-BO_ 4 BMU_batteryStatusHV: 7 BMU
+BO_ 4 BMU_batteryStatusHV: 8 BMU
  SG_ StateBMS : 52|4@1- (1,0) [0|0] "" Vector__XXX
  SG_ TempCellMin : 42|10@1- (0.25,90) [-38|217.75] "C" Vector__XXX
  SG_ TempCellMax : 32|10@1- (0.25,90) [-38|217.75] "C" Vector__XXX
@@ -485,7 +496,7 @@ BO_ 3 BMU_stateBusHV: 8 BMU
  SG_ StateContactorNegative : 24|3@1- (1,0) [0|0] ""  VCU_BeagleBone
  SG_ VoltageBusHV : 0|22@1+ (0.1,0) [0|419430.3] "mV"  VCU_BeagleBone,VCU_F7
 
-BO_ 2 PDU_DCDC_Status: 2 PDU
+BO_ 2 PDU_DCDC_Status: 8 PDU
  SG_ Status_DCDC : 12|4@1- (1,0) [0|0] ""  VCU_BeagleBone,BMU
  SG_ CurrentOutputDCDC : 0|12@1+ (0.01220703125,0) [0|60] "Amps"  VCU_BeagleBone
 
@@ -514,6 +525,7 @@ CM_ BU_ WSBFR "9_4_Wheel Sensor Board Front Right";
 CM_ BU_ WSBRL "10_4_Wheel Sensor Board Rear Left";
 CM_ BU_ WSBRR "11_4_Wheel Sensor Board Rear Right";
 CM_ BU_ ChargeCart "4_3_Charge Cart PCB";
+CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
 CM_ BO_ 35 "VERSION";
 CM_ BO_ 33 "VERSION";
 CM_ BO_ 32 "VERSION";
