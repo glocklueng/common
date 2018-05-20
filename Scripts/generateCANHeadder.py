@@ -217,6 +217,11 @@ for message in messages:
 	fWrite('};', headerFileHandle)
 	fWrite('', headerFileHandle)
 
+
+fWrite('\n// Message Received callbacks, declared with weak linkage to be overwritten by user functions', sourceFileHandle)
+for message in messages:
+    fWrite('__weak void CAN_Msg_' + str(message.name) + '_Callback(void)\n{ return; }', sourceFileHandle)
+
 fWrite('int parseCANData(int id, void * data);', headerFileHandle)
 fWrite('int parseCANData(int id, void * data) {', sourceFileHandle)
 fWrite('	switch(id) {', sourceFileHandle)
@@ -230,6 +235,7 @@ for message in messages:
 		if nodeName in signal.nodes:
 			fWrite('			'+signal.name+ 'Received(new_'+message.name +'->'+ signal.name+');', sourceFileHandle)
 
+    fWrite('			CAN_Msg_' + str(message.name) + '_Callback();', sourceFileHandle)
 	fWrite('			break;', sourceFileHandle)
 	fWrite('		}', sourceFileHandle)
 fWrite('	}', sourceFileHandle)
