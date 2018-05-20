@@ -121,8 +121,7 @@ for signal in variables:
 		type = "float "
 	fWrite('volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), sourceFileHandle)
 	fWrite('extern volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), headerFileHandle)
-	fWrite('void '+ signal.name+'Received('+type+ 'newValue);', headerFileHandle)
-	fWrite('__weak void '+ signal.name+'Received('+type+ 'newValue)\n{', sourceFileHandle)
+	fWrite('void '+ signal.name+'Received('+type+ 'newValue)\n{', sourceFileHandle)
 	fWrite("	newValue = newValue * "+str(signal.scale)+";", sourceFileHandle)
 	fWrite("	newValue = newValue + "+str(signal.offset)+";", sourceFileHandle)
 	fWrite("	"+signal.name + " = newValue;", sourceFileHandle)
@@ -145,7 +144,6 @@ for mes in db.messages:
 						type = "float "
 					fWrite('extern volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), headerFileHandle)
 					fWrite('volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), sourceFileHandle)
-					fWrite(type+ signal.name+'Sending();', headerFileHandle)
 					fWrite('__weak '+type+ signal.name+'Sending()\n{', sourceFileHandle)
 					fWrite('	'+type+'sendValue = '+ signal.name+';', sourceFileHandle)
 					fWrite("	sendValue = sendValue - "+str(signal.offset)+";", sourceFileHandle)
@@ -175,52 +173,53 @@ for mes in db.messages:
 	if nodeName in mes.nodes:
 		messagesREL.append(mes)
 for message in messagesREL:
-	fWrite('struct ' + message.name + '{', headerFileHandle)
+	fWrite('struct ' + message.name + '{', sourceFileHandle)
 	totalSize = message.length*8;
 	currentPos = 0;
 	if message.comment == 'VERSION':
-		fWrite('	int DBC : 8;', headerFileHandle)
+		fWrite('	int DBC : 8;', sourceFileHandle)
 		for i  in range(0,7):
-			fWrite('	char git'+str(i)+' : 8;', headerFileHandle)
+			fWrite('	char git'+str(i)+' : 8;', sourceFileHandle)
 
 
 	else:
 		for signal in message.signals:
 			if signal.start != currentPos:
-				fWrite('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', headerFileHandle)
+				fWrite('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', sourceFileHandle)
 			if signal.is_signed	:
-				fWrite('	         int ' + signal.name + ' : ' + str(signal.length) + ';', headerFileHandle)
+				fWrite('	         int ' + signal.name + ' : ' + str(signal.length) + ';', sourceFileHandle)
 			else :
-				fWrite('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';', headerFileHandle)
+				fWrite('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';', sourceFileHandle)
 			currentPos = signal.start + signal.length
 		if currentPos != totalSize:
-			fWrite('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';', headerFileHandle)
-	fWrite('};', headerFileHandle)
-	fWrite('', headerFileHandle)
-fWrite('', headerFileHandle)
+			fWrite('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';', sourceFileHandle)
+	fWrite('};', sourceFileHandle)
+	fWrite('', sourceFileHandle)
+fWrite('', sourceFileHandle)
 
 
 for message in messages:
-	fWrite('struct ' + message.name + ' {', headerFileHandle)
+	fWrite('struct ' + message.name + ' {', sourceFileHandle)
 	totalSize = message.length*8;
 	currentPos = 0;
 	for signal in message.signals:
 		if signal.start != currentPos:
-			fWrite('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', headerFileHandle)
+			fWrite('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', sourceFileHandle)
 		if signal.is_signed	:
-			fWrite('		     int ' + signal.name + ' : ' + str(signal.length) + ';', headerFileHandle)
+			fWrite('		     int ' + signal.name + ' : ' + str(signal.length) + ';', sourceFileHandle)
 		else :
-			fWrite('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';', headerFileHandle)
+			fWrite('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';', sourceFileHandle)
 		currentPos = signal.start + signal.length
 	if currentPos != totalSize:
-		fWrite('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';', headerFileHandle)
-	fWrite('};', headerFileHandle)
-	fWrite('', headerFileHandle)
+		fWrite('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';', sourceFileHandle)
+	fWrite('};', sourceFileHandle)
+	fWrite('', sourceFileHandle)
 
 
-fWrite('\n// Message Received callbacks, declared with weak linkage to be overwritten by user functions', sourceFileHandle)
+fWrite('// Message Received callbacks, declared with weak linkage to be overwritten by user functions', sourceFileHandle)
 for message in messages:
-    fWrite('__weak void CAN_Msg_' + str(message.name) + '_Callback(void)\n{ return; }', sourceFileHandle)
+	fWrite('__weak void CAN_Msg_' + str(message.name) + '_Callback(void)\n{ return; }', sourceFileHandle)
+	fWrite('', sourceFileHandle)
 
 fWrite('int parseCANData(int id, void * data);', headerFileHandle)
 fWrite('int parseCANData(int id, void * data) {', sourceFileHandle)
@@ -235,7 +234,7 @@ for message in messages:
 		if nodeName in signal.nodes:
 			fWrite('			'+signal.name+ 'Received(new_'+message.name +'->'+ signal.name+');', sourceFileHandle)
 
-    fWrite('			CAN_Msg_' + str(message.name) + '_Callback();', sourceFileHandle)
+	fWrite('			CAN_Msg_' + str(message.name) + '_Callback();', sourceFileHandle)
 	fWrite('			break;', sourceFileHandle)
 	fWrite('		}', sourceFileHandle)
 fWrite('	}', sourceFileHandle)
