@@ -15,7 +15,6 @@ CanRxMsgTypeDef RxMessage;
 void canInit(CAN_HandleTypeDef *pHcan)
 {
     hcan = pHcan;
-    MX_CAN_Init();
     configCANFilters(&hcan);
 }
 
