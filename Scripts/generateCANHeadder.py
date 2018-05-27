@@ -295,9 +295,9 @@ fWrite('	  Error_Handler();', sourceFileHandle)
 fWrite('	}', sourceFileHandle)
 
 fWrite('\n	// Filter msgs to the broadcast Id to fifo 0', sourceFileHandle)
-fWrite('	uint32_t filterID = 0xFF<<8;', sourceFileHandle)
+fWrite('	filterID = 0xFF<<8;', sourceFileHandle)
 fWrite('	filterID = filterID << 3; // Filter ID is left aligned to 32 bits', sourceFileHandle)
-fWrite('	uint32_t filterMask = 0xFF00;', sourceFileHandle)
+fWrite('	filterMask = 0xFF00;', sourceFileHandle)
 fWrite('	filterMask = filterMask << 3; // Filter masks are also left aligned to 32 bits', sourceFileHandle)
 fWrite('	sFilterConfig.filterNumber = 1;', sourceFileHandle)
 fWrite('	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;', sourceFileHandle)
@@ -318,9 +318,9 @@ i = 1
 for messageGroup in messageGroups:
 	i = i + 1
 	fWrite('\n	// Filter msgs to the broadcast Id to fifo 0', sourceFileHandle)
-	fWrite('	uint32_t filterID = ' + messageGroup +'<<12;', sourceFileHandle)
+	fWrite('	filterID = ' + messageGroup +'<<12;', sourceFileHandle)
 	fWrite('	filterID = filterID << 3; // Filter ID is left aligned to 32 bits', sourceFileHandle)
-	fWrite('	uint32_t filterMask = 0xFF00;', sourceFileHandle)
+	fWrite('	filterMask = 0xFF00;', sourceFileHandle)
 	fWrite('	filterMask = filterMask << 3; // Filter masks are also left aligned to 32 bits', sourceFileHandle)
 	fWrite('	sFilterConfig.filterNumber = ' + str(i) + ';', sourceFileHandle)
 	fWrite('	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;', sourceFileHandle)
