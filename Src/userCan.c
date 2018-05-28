@@ -13,6 +13,7 @@
 #include "stdbool.h"
 #include <string.h>
 #include AUTOGEN_HEADER_NAME(BOARD_NAME)
+#include "can.h"
 
 CanRxMsgTypeDef RxMessage;
 
@@ -55,13 +56,13 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 }
 
 
-HAL_StatusTypeDef sendCanMessage(CAN_HandleTypeDef *hcan, int id, int length, uint8_t *data)
+HAL_StatusTypeDef sendCanMessage(int id, int length, uint8_t *data)
 {
   const int CAN_TIMEOUT = 100;
 
   HAL_StatusTypeDef rc = HAL_ERROR;
   CanTxMsgTypeDef        TxMessage;
-  hcan->pTxMsg = &TxMessage;
+  hcan.pTxMsg = &TxMessage;
 
   if (length > 8) {
     return HAL_ERROR;
@@ -79,7 +80,7 @@ HAL_StatusTypeDef sendCanMessage(CAN_HandleTypeDef *hcan, int id, int length, ui
   TxMessage.DLC = length;
   memcpy(TxMessage.Data, data, length);
 
-  rc = HAL_CAN_Transmit(hcan, CAN_TIMEOUT);
+  rc = HAL_CAN_Transmit(&hcan, CAN_TIMEOUT);
   if (rc != HAL_OK)
   {
     printf("CAN Transmit failed with rc %d\n", rc);

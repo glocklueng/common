@@ -93,6 +93,7 @@ fWrite('char gitCommit[] = \"'+gitCommit+'\";', sourceFileHandle)
 fWrite('//'+nodeName+' can headder', sourceFileHandle)
 fWrite("#include \""+nodeName+"_can.h\"", sourceFileHandle)
 fWrite('#include \"CRC_CALC.h\"', sourceFileHandle)
+fWrite('#include \"userCan.h\"', sourceFileHandle)
 
 nodeList = list()
 
