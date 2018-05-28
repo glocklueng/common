@@ -1,5 +1,5 @@
 /*
- * can.c
+ * userCan.c
  *
  */
 #define STRINGIZE_AUX(a) #a
@@ -9,7 +9,7 @@
 #define AUTOGEN_HEADER_NAME(boardName) STRINGIZE(CAT(boardName, _can.h))
 
 #include "stm32f0xx_hal.h"
-#include "can.h"
+#include "userCan.h"
 #include "stdbool.h"
 #include <string.h>
 #include AUTOGEN_HEADER_NAME(BOARD_NAME)
