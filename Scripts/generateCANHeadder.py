@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-
+import logging, sys
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 import cantools #$ pip install cantools
 import os
 from pprint import pprint
@@ -117,12 +118,10 @@ for mes in db.messages:
 
 fWrite('// Incoming variables', sourceFileHandle)
 for signal in variables:
-	type = "int "
-	if((signal.is_float)):
-		type = "float "
+	type = "float "
 	fWrite('volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), sourceFileHandle)
 	fWrite('extern volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), headerFileHandle)
-	fWrite('void '+ signal.name+'Received('+type+ 'newValue)\n{', sourceFileHandle)
+	fWrite('void '+ signal.name+'Received(int newValue)\n{', sourceFileHandle)
 	fWrite("	newValue = newValue * "+str(signal.scale)+";", sourceFileHandle)
 	fWrite("	newValue = newValue + "+str(signal.offset)+";", sourceFileHandle)
 	fWrite("	"+signal.name + " = newValue;", sourceFileHandle)
@@ -141,12 +140,10 @@ for mes in db.messages:
 			for signal in mes.signals:
 				if signal.comment != "PROCAN":
 					type = "int "
-					if((signal.is_float)):
-						type = "float "
-					fWrite('extern volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), headerFileHandle)
-					fWrite('volatile '+ type + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), sourceFileHandle)
+					fWrite('extern volatile float ' + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), headerFileHandle)
+					fWrite('volatile float ' + signal.name + ';	// offset: ' + str(signal.offset)+ " scaler: "+ str(signal.scale), sourceFileHandle)
 					fWrite('__weak '+type+ signal.name+'Sending()\n{', sourceFileHandle)
-					fWrite('	'+type+'sendValue = '+ signal.name+';', sourceFileHandle)
+					fWrite('	float sendValue = '+ signal.name+';', sourceFileHandle)
 					fWrite("	sendValue = sendValue - "+str(signal.offset)+";", sourceFileHandle)
 					fWrite("	sendValue = sendValue / "+str(signal.scale)+";", sourceFileHandle)
 					fWrite("	return sendValue;", sourceFileHandle)
@@ -186,14 +183,14 @@ for message in messagesREL:
 	else:
 		for signal in message.signals:
 			if signal.start != currentPos:
-				fWrite('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', sourceFileHandle)
+				fWrite('	uint64_t FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', sourceFileHandle)
 			if signal.is_signed	:
 				fWrite('	         int ' + signal.name + ' : ' + str(signal.length) + ';', sourceFileHandle)
 			else :
 				fWrite('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';', sourceFileHandle)
 			currentPos = signal.start + signal.length
 		if currentPos != totalSize:
-			fWrite('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';', sourceFileHandle)
+			fWrite('	uint64_t FILLER_END : ' + str(totalSize - currentPos) + ';', sourceFileHandle)
 	fWrite('};', sourceFileHandle)
 	fWrite('', sourceFileHandle)
 fWrite('', sourceFileHandle)
@@ -205,14 +202,14 @@ for message in messages:
 	currentPos = 0;
 	for signal in message.signals:
 		if signal.start != currentPos:
-			fWrite('	unsigned int FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', sourceFileHandle)
+			fWrite('	uint64_t FILLER_'+ str(signal.start) + ' : ' + str(signal.start - currentPos) + ';', sourceFileHandle)
 		if signal.is_signed	:
 			fWrite('		     int ' + signal.name + ' : ' + str(signal.length) + ';', sourceFileHandle)
 		else :
 			fWrite('	unsigned int ' + signal.name + ' : ' + str(signal.length) + ';', sourceFileHandle)
 		currentPos = signal.start + signal.length
 	if currentPos != totalSize:
-		fWrite('	unsigned int FILLER_END : ' + str(totalSize - currentPos) + ';', sourceFileHandle)
+		fWrite('	uint64_t FILLER_END : ' + str(totalSize - currentPos) + ';', sourceFileHandle)
 	fWrite('};', sourceFileHandle)
 	fWrite('', sourceFileHandle)
 

@@ -37,8 +37,7 @@ HAL_StatusTypeDef canStartReceiving(CAN_HandleTypeDef *hcan)
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 {
     printf("Received can message with id 0x%lX\n", hcan->pRxMsg->ExtId);
-    int msgId = (hcan->pRxMsg->ExtId & 0xFF0000) >> 16;
-    if (parseCANData(msgId, hcan->pRxMsg->Data))
+    if (parseCANData(hcan->pRxMsg->ExtId, hcan->pRxMsg->Data))
     {
         // TODO: Probably shouldn't call this from an interrupt
         Error_Handler();

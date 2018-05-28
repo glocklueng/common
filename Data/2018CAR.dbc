@@ -481,11 +481,11 @@ BO_ 5 PDU_batteryStatusLV: 8 PDU
  SG_ StateBatteryHealthLV : 10|10@1+ (0.1,0) [0|100] "%"  VCU_BeagleBone
  SG_ StateBatteryChargeLV : 0|10@1+ (0.1,0) [0|102.3] "%"  VCU_BeagleBone
 
-BO_ 4 BMU_batteryStatusHV: 8 BMU
- SG_ StateBMS : 52|4@1- (1,0) [0|0] "" Vector__XXX
+BO_ 2147749889 BMU_batteryStatusHV: 8 BMU
+ SG_ StateBMS : 52|4@1- (1,0) [0|0] ""  VCU_F7
  SG_ TempCellMin : 42|10@1- (0.25,90) [-38|217.75] "C" Vector__XXX
  SG_ TempCellMax : 32|10@1- (0.25,90) [-38|217.75] "C" Vector__XXX
- SG_ StateBatteryPowerHV : 20|12@1+ (0.1,0) [0|409.5] "A"  VCU_BeagleBone,DCU,ChargeCart
+ SG_ StateBatteryPowerHV : 20|12@1+ (0.1,0) [0|409.5] "A"  VCU_BeagleBone,DCU,ChargeCart,VCU_F7
  SG_ StateBatteryHealthHV : 10|10@1+ (0.1,0) [0|100] "%"  VCU_BeagleBone
  SG_ StateBatteryChargeHV : 0|10@1+ (0.1,0) [0|102.3] "%"  VCU_BeagleBone,DCU
 
